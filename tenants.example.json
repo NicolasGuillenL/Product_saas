@@ -1,0 +1,15 @@
+[
+  {
+    "id": "minhaloja",
+    "name": "Minha Loja",
+    "apiKey": "troque-por-uma-chave-aleatoria",
+    "allowedOrigins": ["https://minhaloja.com.br"],
+    "affiliate": {
+      "shopee": { "appId": "SEU_APP_ID", "secret": "SEU_SECRET" },
+      "amazonTag": "minhaloja-20",
+      "templates": {
+        "mercadolivre": "https://exemplo-rede-afiliados.com/deeplink?url={url}"
+      }
+    }
+  }
+]

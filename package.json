@@ -1,0 +1,34 @@
+{
+  "name": "preco-certo",
+  "version": "1.0.0",
+  "description": "SaaS de comparação de preços com links de afiliado (Shopee, Mercado Livre, Google Shopping)",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NicolasGuillenL/Product_saas.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/NicolasGuillenL/Product_saas/issues"
+  },
+  "homepage": "https://github.com/NicolasGuillenL/Product_saas#readme",
+  "dependencies": {
+    "@hono/node-server": "^2.1.4",
+    "hono": "^4.13.13"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
+  },
+  "type": "module",
+  "private": true
+}

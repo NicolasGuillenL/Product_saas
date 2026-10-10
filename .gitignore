@@ -1,0 +1,4 @@
+node_modules/
+tenants.json
+.env
+.vercel
