@@ -11,7 +11,23 @@ const CATALOG: Omit<Product, 'id' | 'currency'>[] = [
   { title: 'Pé Regulável para Mesa Inox (unidade)', price: 19.9, url: 'https://shopee.com.br/product/1/106', store: 'Shopee · Peças', marketplace: 'shopee' },
   { title: 'Mesa Inox Gourmet 1,00m', price: 399.0, url: 'https://shopee.com.br/product/1/107', store: 'Shopee · Gourmet', marketplace: 'shopee' },
   { title: 'Cadeira de Escritório Ergonômica', price: 499.0, url: 'https://shopee.com.br/product/1/108', store: 'Shopee', marketplace: 'shopee' },
+  { title: 'Cadeira Gamer Reclinável com Almofadas', price: 689.0, url: 'https://shopee.com.br/product/1/109', store: 'Shopee · GameStore', marketplace: 'shopee' },
+  { title: 'Cadeira Gamer Preta e Vermelha', price: 759.9, url: 'https://www.mercadolivre.com.br/p/MLB110', store: 'Mercado Livre', marketplace: 'mercadolivre' },
+  { title: 'Fone de Ouvido Bluetooth TWS', price: 59.9, url: 'https://shopee.com.br/product/1/111', store: 'Shopee · AudioMix', marketplace: 'shopee' },
+  { title: 'Fone Bluetooth com Cancelamento de Ruído', price: 189.0, url: 'https://www.amazon.com.br/dp/B0DEMO112', store: 'Amazon', marketplace: 'amazon' },
+  { title: 'Fone Bluetooth Esportivo à Prova d’Água', price: 79.9, url: 'https://www.mercadolivre.com.br/p/MLB113', store: 'Mercado Livre', marketplace: 'mercadolivre' },
 ];
+
+const COLORS: Record<string, string> = { shopee: '#ee4d2d', mercadolivre: '#ffe600', amazon: '#232f3e', magalu: '#0086ff' };
+
+/** Imagem SVG embutida: não depende de serviço externo de placeholder. */
+function demoImage(title: string, marketplace: string): string {
+  const initials = title.split(' ').slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+  const bg = COLORS[marketplace] ?? '#888';
+  const fg = marketplace === 'mercadolivre' ? '#333' : '#fff';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"><rect width="120" height="120" fill="${bg}"/><text x="60" y="72" font-family="sans-serif" font-size="40" font-weight="700" fill="${fg}" text-anchor="middle">${initials}</text></svg>`;
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
 
 export class DemoProvider implements Provider {
   name = 'demo';
@@ -19,7 +35,7 @@ export class DemoProvider implements Provider {
   async search({ query }: SearchOptions): Promise<Product[]> {
     return CATALOG.filter((p) => relevance(query, p.title) > 0).map((p, i) => ({
       ...p, id: `demo:${i}`, currency: 'BRL',
-      imageUrl: `https://placehold.co/300x300/eee/333?text=${encodeURIComponent(p.store.split(' ')[0])}`,
+      imageUrl: demoImage(p.title, p.marketplace),
     }));
   }
 }

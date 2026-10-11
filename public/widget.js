@@ -26,14 +26,19 @@
     '.info{flex:1;min-width:0}.title{font-size:14px;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}' +
     '.store{font-size:12px;color:#6e6e73;margin-top:4px}.price{font-weight:700;font-size:17px;white-space:nowrap}' +
     '.rank{font-size:12px;color:#6e6e73;width:20px;text-align:center}.msg{color:#6e6e73;font-size:14px;padding:8px 0}' +
+    '.demo{background:#fff4e5;color:#8a4b00;border:1px solid #ffd8a8;border-radius:10px;padding:8px 12px;font-size:13px;margin-bottom:12px}' +
     '</style>' +
     '<form><input name="q" placeholder="O que você procura? Ex.: mesa inox" required minlength="2" maxlength="100">' +
-    '<button>Buscar</button></form><div class="msg" hidden></div><div class="list"></div>';
+    '<button>Buscar</button></form><div class="demo" hidden>Modo demonstração: resultados fictícios. Configure as credenciais (Shopee) na API para buscar produtos reais.</div>' +
+    '<div class="msg" hidden></div><div class="list"></div>';
 
   var form = root.querySelector('form');
   var btn = root.querySelector('button');
   var msg = root.querySelector('.msg');
   var list = root.querySelector('.list');
+  var demo = root.querySelector('.demo');
+  // Imagem reserva caso a da loja não carregue.
+  var FALLBACK_IMG = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" fill="#f2f2f5"/><path d="M20 42l8-10 6 7 4-5 6 8z" fill="#c7c7cc"/><circle cx="26" cy="24" r="4" fill="#c7c7cc"/></svg>');
   var brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
   function el(tag, cls, text) {
@@ -52,12 +57,18 @@
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (data.error) return say(data.error);
-        if (!data.products.length) return say('Nenhum produto encontrado. Tente outros termos.');
+        demo.hidden = !data.demo;
+        if (!data.products.length) {
+          var why = (data.errors || []).map(function (e) { return e.message; }).join(' · ');
+          return say(why ? 'Não foi possível buscar: ' + why : 'Nenhum produto encontrado. Tente outros termos.');
+        }
         say('');
         data.products.forEach(function (p, i) {
           var a = el('a', 'card');
           a.href = p.link; a.target = '_blank'; a.rel = 'noopener sponsored';
-          var img = el('img'); img.src = p.imageUrl || ''; img.alt = ''; img.loading = 'lazy';
+          var img = el('img'); img.alt = ''; img.loading = 'lazy'; img.referrerPolicy = 'no-referrer';
+          img.onerror = function () { img.onerror = null; img.src = FALLBACK_IMG; };
+          img.src = p.imageUrl || FALLBACK_IMG;
           var info = el('div', 'info');
           info.appendChild(el('div', 'title', p.title));
           info.appendChild(el('div', 'store', p.store));

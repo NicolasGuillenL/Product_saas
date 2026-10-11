@@ -26,10 +26,15 @@ export function tokens(text: string): string[] {
     .map(stem);
 }
 
+/** Termo da busca bate com palavra do título igual ou que começa com ele ("inox" -> "inoxidavel"). */
+function matches(queryToken: string, titleTokens: string[]): boolean {
+  return titleTokens.some((t) => t === queryToken || (queryToken.length >= 3 && t.startsWith(queryToken)));
+}
+
 /** Fração (0..1) dos termos da busca presentes no título do produto. */
 export function relevance(query: string, title: string): number {
   const q = [...new Set(tokens(query))];
   if (q.length === 0) return 0;
-  const t = new Set(tokens(title));
-  return q.filter((tok) => t.has(tok)).length / q.length;
+  const t = tokens(title);
+  return q.filter((tok) => matches(tok, t)).length / q.length;
 }

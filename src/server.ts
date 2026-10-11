@@ -17,6 +17,12 @@ const port = Number(env.PORT) || 3000;
 const tenants = loadTenants();
 const hasShopee = Boolean(env.SHOPEE_APP_ID) || tenants.some((t) => t.affiliate.shopee);
 
+const hasMl = Boolean(env.MERCADOLIVRE_CLIENT_ID || env.MERCADOLIVRE_TOKEN);
+const demo = env.DEMO === 'true' || (!hasShopee && !hasMl && !env.SERPAPI_KEY);
+const sources = [hasShopee && 'Shopee', hasMl && 'Mercado Livre', env.SERPAPI_KEY && 'Google Shopping', demo && 'DEMO (catálogo fictício)'].filter(Boolean);
+console.log(`Fontes ativas: ${sources.join(', ')}`);
+if (demo) console.warn('Modo demonstração: só existem alguns produtos fictícios. Configure SHOPEE_APP_ID/SHOPEE_SECRET no .env para buscar produtos reais.');
+
 if (!env.LINK_SECRET) console.warn('LINK_SECRET não definido: usando segredo de desenvolvimento.');
 
 const app = createApp({
@@ -27,12 +33,16 @@ const app = createApp({
     shopee: env.SHOPEE_APP_ID && env.SHOPEE_SECRET ? { appId: env.SHOPEE_APP_ID, secret: env.SHOPEE_SECRET } : undefined,
     amazonTag: env.AMAZON_TAG,
   },
-  mercadoLivre: env.MERCADOLIVRE_ENABLED === 'true' ? { accessToken: env.MERCADOLIVRE_TOKEN } : undefined,
+  mercadoLivre:
+    env.MERCADOLIVRE_CLIENT_ID || env.MERCADOLIVRE_TOKEN
+      ? { clientId: env.MERCADOLIVRE_CLIENT_ID, clientSecret: env.MERCADOLIVRE_CLIENT_SECRET, accessToken: env.MERCADOLIVRE_TOKEN }
+      : undefined,
   serpApiKey: env.SERPAPI_KEY,
-  demo: env.DEMO === 'true' || (!hasShopee && env.MERCADOLIVRE_ENABLED !== 'true' && !env.SERPAPI_KEY),
+  demo,
   onClick: (e) => console.log(JSON.stringify({ type: 'click', ...e })),
 });
 
+app.get('/', (c) => c.redirect('/demo.html'));
 app.use('/*', serveStatic({ root: './public' }));
 
 serve({ fetch: app.fetch, port }, () => console.log(`Rodando em http://localhost:${port} (demo: http://localhost:${port}/demo.html)`));

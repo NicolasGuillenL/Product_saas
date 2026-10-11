@@ -13,6 +13,12 @@ describe('relevance', () => {
     expect(relevance('Mesas de INÓX', 'mesa inox 1,20m')).toBe(1);
     expect(relevance('mesa inox', 'Cadeira de inox')).toBe(0.5);
   });
+
+  it('casa termo abreviado com palavra completa (inox -> inoxidável)', () => {
+    expect(relevance('mesa inox', 'Mesa Aço Inoxidável 1,20m')).toBe(1);
+    expect(relevance('tv', 'Suporte TV 32')).toBe(1);
+    expect(relevance('mesa', 'Mesquita decorativa')).toBe(0);
+  });
 });
 
 describe('rank', () => {

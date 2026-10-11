@@ -9,6 +9,18 @@ const app = createApp({
 });
 
 describe('API', () => {
+  it('avisa quando está em modo demonstração', async () => {
+    const body = await (await app.request('/api/search?key=k1&q=geladeira')).json();
+    expect(body.demo).toBe(true);
+    expect(body.count).toBe(0);
+  });
+
+  it('/go não quebra com URL inválida no token', async () => {
+    const { signToken } = await import('../src/core/crypto.js');
+    const t = await signToken({ t: 'loja1', u: 'nao-e-url', m: 'amazon' }, 'segredo');
+    expect((await app.request(`/go?t=${t}`)).status).toBe(400);
+  });
+
   it('exige api key', async () => {
     expect((await app.request('/api/search?q=mesa')).status).toBe(401);
   });

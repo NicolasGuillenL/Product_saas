@@ -7,7 +7,7 @@ import { signToken, verifyToken } from './core/crypto.js';
 import { normalize } from './core/similarity.js';
 import { resolveAffiliateUrl, type AffiliateConfig, type LinkPayload } from './affiliate/resolve.js';
 import { ShopeeProvider } from './providers/shopee.js';
-import { MercadoLivreProvider } from './providers/mercadolivre.js';
+import { MercadoLivreProvider, type MercadoLivreAuth } from './providers/mercadolivre.js';
 import { SerpApiProvider } from './providers/serpapi.js';
 import { DemoProvider } from './providers/demo.js';
 
@@ -19,8 +19,8 @@ export interface AppConfig {
   publicUrl: string;
   /** Afiliação do dono do SaaS, usada quando o tenant não tem a própria. */
   platform?: AffiliateConfig;
-  /** Liga o Mercado Livre. O token é opcional, mas a busca pública pode exigir um. */
-  mercadoLivre?: { accessToken?: string };
+  /** Liga o Mercado Livre. Sem credenciais a busca responde 403. */
+  mercadoLivre?: MercadoLivreAuth;
   serpApiKey?: string;
   /** Liga o catálogo de demonstração (útil sem credenciais). */
   demo?: boolean;
@@ -33,12 +33,13 @@ export function createApp(config: AppConfig) {
   const byKey = new Map(config.tenants.map((t) => [t.apiKey, t]));
   const byId = new Map(config.tenants.map((t) => [t.id, t]));
   const cache = new TtlCache<SearchResult>(60 * 60 * 1000);
+  const mercadoLivre = config.mercadoLivre && new MercadoLivreProvider(config.mercadoLivre, fetchImpl);
 
   function providersFor(tenant: Tenant): { list: Provider[]; cacheKey: string } {
     const list: Provider[] = [];
     const shopee = tenant.affiliate.shopee ?? config.platform?.shopee;
     if (shopee) list.push(new ShopeeProvider(shopee, fetchImpl));
-    if (config.mercadoLivre) list.push(new MercadoLivreProvider(config.mercadoLivre.accessToken, fetchImpl));
+    if (mercadoLivre) list.push(mercadoLivre);
     if (config.serpApiKey) list.push(new SerpApiProvider(config.serpApiKey, fetchImpl));
     if (config.demo) list.push(new DemoProvider());
     // Os offerLinks da Shopee são da credencial usada, então o cache separa por credencial.
@@ -87,13 +88,13 @@ export function createApp(config: AppConfig) {
         return { ...p, link: `${config.publicUrl}/go?t=${await signToken(payload, config.linkSecret)}` };
       }),
     );
-    return c.json({ query: q, count: products.length, products, errors: result.errors });
+    return c.json({ query: q, count: products.length, demo: Boolean(config.demo), products, errors: result.errors });
   });
 
   app.get('/go', async (c) => {
     const payload = await verifyToken<LinkPayload>(c.req.query('t') ?? '', config.linkSecret);
     const tenant = payload && byId.get(payload.t);
-    if (!payload || !tenant) return c.text('link inválido', 400);
+    if (!payload || !tenant || !/^https?:\/\//.test(payload.u) || !URL.canParse(payload.u)) return c.text('link inválido', 400);
 
     const { url, affiliated } = await resolveAffiliateUrl(payload, tenant.affiliate, config.platform, fetchImpl);
     config.onClick?.({ tenant: tenant.id, marketplace: payload.m, affiliated, at: new Date().toISOString() });

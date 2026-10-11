@@ -31,7 +31,7 @@ Visitante clica ──GET /go?t=<token assinado>──▶ API decide o link:
 
 ```bash
 npm install
-npm run dev        # sobe em http://localhost:3000 em modo demo
+npm run dev        # sem credenciais sobe em MODO DEMO (catálogo fictício com poucos itens)
 # abra http://localhost:3000/demo.html
 npm test           # testes
 ```
@@ -51,7 +51,7 @@ Ou consuma a API direto: `GET /api/search?key=...&q=mesa%20inox&limit=5&mode=sim
 |---|---|---|
 | Shopee | affiliate.shopee.com.br → Open API (precisa ser afiliado aprovado) | Busca + link de afiliado. É a peça principal. |
 | Amazon | associados.amazon.com.br | Só a tag (`xxx-20`); a busca vem do Google Shopping. |
-| Mercado Livre | developers.mercadolivre.com.br | Busca pode exigir token. O programa de afiliados do ML não tem API pública: use `templates` se tiver deeplink por outra rede. |
+| Mercado Livre | developers.mercadolivre.com.br | Sem `MERCADOLIVRE_CLIENT_ID/SECRET` a busca responde 403; o token é gerado e renovado sozinho. O programa de afiliados do ML não tem API pública: use `templates` se tiver deeplink por outra rede. |
 | SerpAPI | serpapi.com | Plano gratuito com cota mensal pequena. |
 
 Copie `.env.example` → `.env` e `tenants.example.json` → `tenants.json` (cada site cliente é um *tenant*
