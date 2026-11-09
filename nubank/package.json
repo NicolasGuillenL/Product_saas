@@ -1,0 +1,19 @@
+{
+  "name": "nubank-pluggy",
+  "version": "1.0.0",
+  "description": "Lê Pix, boletos e faturas da sua conta Nubank via Open Finance (Meu Pluggy, grátis para uso pessoal)",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "tsx src/cli.ts",
+    "demo": "tsx src/cli.ts --demo",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
+  }
+}
